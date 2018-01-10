@@ -29,6 +29,11 @@ public class UnityChanController : MonoBehaviour {
 	//得点
 	private int score = 0;
 
+	//左ボタン押下の判定
+	private bool isLButtonDown = false;
+	//右ボタン押下の判定
+	private bool isRButtonDown = false;
+
 
 
 	// Use this for initialization
@@ -67,13 +72,15 @@ public class UnityChanController : MonoBehaviour {
 		this.myRigidbody.AddForce (this.transform.forward * this.forwardForce);
 
 		//Unityちゃんを矢印キーまたはボタンに応じて左右に移動させる
-		if (Input.GetKey (KeyCode.LeftArrow) && -this.movableRange < this.transform.position.x) {
+		if ((Input.GetKey (KeyCode.LeftArrow) || this.isLButtonDown) && -this.movableRange <this.transform.position.x) {
 			//左に移動
-			this.myRigidbody.AddForce (-this.turnForce, 0, 0);
-		} else if (Input.GetKey (KeyCode.RightArrow) && this.transform.position.x < this.movableRange) {
+			this.myRigidbody.AddForce(-this.turnForce,0,0);
+		} else if ((Input.GetKey(KeyCode.RightArrow) || this.isRButtonDown) && this.transform.position.x < this.movableRange) {
 			//右に移動
-			this.myRigidbody.AddForce (this.turnForce, 0, 0);
+			this.myRigidbody.AddForce (this.turnForce,0,0);
 		}
+
+			
 		//jumpステートの場合はjumpにfalseをセットする
 		if (this.myAnimator.GetCurrentAnimatorStateInfo (0).IsName ("jump")) {
 			this.myAnimator.SetBool ("jump", false);
@@ -91,22 +98,22 @@ public class UnityChanController : MonoBehaviour {
 		//トリガーモードで他のオブジェクトと接触した場合の処理
 		void OnTriggerEnter(Collider other) {
 		
-			//障害物に衝突した場合
-			if(other.gameObject.tag == "CarTag" || other.gameObject.tag == "TrafficConeTag"){
-				this.isEnd = true;
-				//stateTextにGAME OVERを表示
-			this.stateText.GetComponent<Text>().text = "GAME OVER";
-			}
+		//障害物に衝突した場合
+		if (other.gameObject.tag == "CarTag" || other.gameObject.tag == "TrafficConeTag") {
+			this.isEnd = true;
+			//stateTextにGAME OVERを表示
+			this.stateText.GetComponent<Text> ().text = "GAME OVER";
+		}
 
-			//ゴール地点に到達した場合
-			if(other.gameObject.tag == "GoalTag") {
-				this.isEnd = true;
-				//stateTextに　GAME CLEARを表示
-			this.stateText.GetComponent<Text>().text = "CLEAR!";
-			}
+		//ゴール地点に到達した場合
+		if (other.gameObject.tag == "GoalTag") {
+			this.isEnd = true;
+			//stateTextに　GAME CLEARを表示
+			this.stateText.GetComponent<Text> ().text = "CLEAR!";
+		}
 
-			//コインに衝突した場合
-			if (other.gameObject.tag == "CoinTag") {
+		//コインに衝突した場合
+		if (other.gameObject.tag == "CoinTag") {
 
 			//スコアを加算
 			this.score += 10;
@@ -114,10 +121,46 @@ public class UnityChanController : MonoBehaviour {
 			//scoreText獲得した点数を表示
 			this.scoreText.GetComponent<Text> ().text = "Score" + this.score + "pt";
 
-				//パーティクルを再生
+			//パーティクルを再生
 			GetComponent<ParticleSystem> ().Play ();
-				//接触したオブジェクトを破棄
+			//接触したオブジェクトを破棄
 			Destroy (other.gameObject);
-			}
+		}
 	}
+				//ジャンプボタンを押した場合の処理
+				public void GetMyJumpButtonDown() {
+		if (this.transform.position.y < 0.5f) {
+			this.myAnimator.SetBool ("Jump", true);
+			this.myRigidbody.AddForce (this.transform.up * this.upForce);
+		}
+	}
+			
+			//左ボタンを押し続けた場合の処理
+				public void GetMyLeftButtonDown(){
+					this.isLButtonDown = true;
+			}
+			//左ボタンを離した場合の処理
+				public void GetMyLeftButtonUp(){
+					this.isLButtonDown = false;
+			}
+			//右ボタンを押し続けた場合の処理
+				public void GetMyRightButtonDown(){
+						this.isRButtonDown = true;
+			}
+			//右ボタンを離した場合の処理
+				public void GetMyRightButtonUp(){
+						this.isRButtonDown = false;
+			}
+						
 }
+
+
+
+
+
+
+
+
+
+
+
